@@ -21,11 +21,11 @@ const Auth: React.FC<Props> = ({ onLogin }) => {
       plan: 'free',
       promptsCount: 0,
       referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-      ownerStats: {
-        totalSales: 0,
-        activeSubscribers: 0,
-        netRevenue: 0,
-        pendingPayout: 0
+      referralStats: {
+        inviteCount: 0,
+        discountLevel: 0,
+        unlockedMonths: 0,
+        hasLifetimeBadge: false
       }
     };
     onLogin(mockUser);

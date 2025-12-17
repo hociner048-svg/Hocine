@@ -2,9 +2,8 @@
 import React, { useState } from 'react';
 import { User } from '../types';
 import { 
-  Share2, Copy, Check, Users, TrendingUp, Wallet, CreditCard, Save, AlertCircle,
-  ArrowUpRight, Clock, CheckCircle2, ShieldCheck, HelpCircle, ArrowRight, BarChart3,
-  Percent, FlaskConical
+  Share2, Copy, Check, Users, Gift, Star, ShieldCheck, 
+  ArrowRight, BarChart3, Percent, Heart, Sparkles
 } from 'lucide-react';
 
 interface Props {
@@ -14,200 +13,147 @@ interface Props {
 
 const AffiliateDashboard: React.FC<Props> = ({ user, onUpdateUser }) => {
   const [copied, setCopied] = useState(false);
-  const [payoutEmail, setPayoutEmail] = useState(user.payoutEmail || '');
-  const [payoutMethod, setPayoutMethod] = useState<'card' | 'bank' | 'paypal'>(user.payoutMethod || 'card');
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [withdrawSuccess, setWithdrawSuccess] = useState(false);
 
-  // Owner Stats (The Boss)
-  const stats = user.ownerStats || {
-    totalSales: 0,
-    activeSubscribers: 0,
-    netRevenue: 0,
-    pendingPayout: 0
+  const stats = user.referralStats || {
+    inviteCount: 0,
+    discountLevel: 0,
+    unlockedMonths: 0,
+    hasLifetimeBadge: false
   };
 
-  const minPayout = 20;
-  const canWithdraw = stats.pendingPayout >= minPayout;
+  const referralLink = `https://promptflow.ai/ref=${user.referralCode}`;
 
-  const handleSavePayout = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    // SIMULATION : Real Stripe API call would happen here
-    setTimeout(() => {
-      onUpdateUser({
-        ...user,
-        payoutEmail,
-        payoutMethod
-      });
-      setIsSaving(false);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    }, 1000);
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleWithdraw = () => {
-    if (!canWithdraw) return;
-    setIsWithdrawing(true);
-    // Transfer simulation
-    setTimeout(() => {
-      setIsWithdrawing(false);
-      setWithdrawSuccess(true);
-      setTimeout(() => setWithdrawSuccess(false), 5000);
-    }, 2500);
-  };
+  const milestones = [
+    { count: 1, label: 'Invite 1 Friend', reward: '20% Off Next Month', icon: <Percent className="w-5 h-5" />, reached: stats.inviteCount >= 1 },
+    { count: 3, label: 'Invite 3 Friends', reward: '1 Month Pro FREE', icon: <Sparkles className="w-5 h-5" />, reached: stats.inviteCount >= 3 },
+    { count: 5, label: 'Invite 5 Friends', reward: 'Lifetime Founder Badge', icon: <ShieldCheck className="w-5 h-5" />, reached: stats.inviteCount >= 5 },
+    { count: 10, label: 'Invite 10 Friends', reward: 'Permanent 50% Discount', icon: <Star className="w-5 h-5" />, reached: stats.inviteCount >= 10 },
+  ];
 
   return (
     <div className="space-y-12 animate-in fade-in duration-700">
-      <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl w-fit mx-auto sm:mx-0">
-        <FlaskConical className="w-4 h-4 text-amber-500" />
-        <span className="text-xs font-black text-amber-500 uppercase tracking-widest">Simulation Mode / Demo</span>
-      </div>
-
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-4 max-w-2xl">
-          <div className="flex items-center gap-2 text-green-400 font-bold uppercase tracking-widest text-xs">
-            <ShieldCheck className="w-4 h-4" />
-            SaaS Owner
+          <div className="flex items-center gap-2 text-purple-400 font-bold uppercase tracking-widest text-xs">
+            <Gift className="w-4 h-4" />
+            Referral Rewards
           </div>
-          <h2 className="text-5xl font-black text-white tracking-tight">Earning Boss</h2>
+          <h2 className="text-5xl font-black text-white tracking-tight">Invite & Unlock</h2>
           <p className="text-slate-400 text-lg">
-            No 10% commission limits here. Keep <span className="text-white font-bold underline decoration-green-500 underline-offset-4">94% of every sale</span> directly in your pocket.
+            Share PromptFlow with your network. No cash payouts, just <span className="text-white font-bold underline decoration-purple-500 underline-offset-4">massive discounts</span> and free Pro access.
           </p>
         </div>
-        <div className={`px-6 py-2 rounded-full border flex items-center gap-2 text-sm font-bold shadow-lg ${user.payoutEmail ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-orange-500/10 border-orange-500/20 text-orange-400'}`}>
-          {user.payoutEmail ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-          {user.payoutEmail ? 'Payouts Active (Demo)' : 'Setup Required'}
+        <div className="px-6 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 flex items-center gap-2 text-sm font-bold shadow-lg text-purple-400">
+          <Users className="w-4 h-4" />
+          {stats.inviteCount} Friends Invited
         </div>
       </header>
 
-      {/* Breakdown Math Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <section className="bg-slate-900 border border-white/5 rounded-[2.5rem] p-8 space-y-6">
-          <h3 className="text-xl font-black flex items-center gap-3">
-            <Percent className="w-5 h-5 text-purple-400" />
-            Profit Breakdown
+      {/* Referral Link Card */}
+      <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/10 p-10 rounded-[2.5rem] space-y-8 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none -mr-10 -mt-10">
+          <Share2 className="w-64 h-64 text-white" />
+        </div>
+        
+        <div className="space-y-4 relative z-10">
+          <h3 className="text-2xl font-black text-white flex items-center gap-3">
+            Your Magic Link
           </h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-white/5">
-              <span className="text-slate-400 font-medium">Customer Payment</span>
-              <span className="text-white font-black text-xl">+ $5.00</span>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-white/5">
-              <span className="text-slate-400 font-medium">Stripe Fees (Processing)</span>
-              <span className="text-red-400 font-bold">- $0.30</span>
-            </div>
-            <div className="flex justify-between items-center py-4 bg-white/5 rounded-2xl px-4">
-              <span className="text-white font-bold text-lg">Your Net Profit</span>
-              <span className="text-green-400 font-black text-2xl">$4.70</span>
-            </div>
-          </div>
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
-            Note: This is roughly 9x more than a standard 10% affiliate commission ($0.50).
-          </p>
-        </section>
-
-        <div className="bg-gradient-to-br from-green-600 to-emerald-700 p-8 rounded-[2.5rem] shadow-2xl shadow-green-500/20 space-y-8 relative overflow-hidden flex flex-col justify-between">
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+          <p className="text-slate-400 font-medium">When friends sign up using this link, you both unlock rewards.</p>
           
-          <div className="space-y-2 relative">
-            <p className="text-green-100 font-bold text-xs uppercase tracking-widest">Available for Withdrawal (Demo)</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-6xl font-black text-white tracking-tighter">${stats.pendingPayout.toFixed(2)}</span>
-              <span className="text-green-200 text-sm font-bold uppercase">USD</span>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 bg-slate-950 border border-white/10 rounded-2xl px-6 py-5 font-mono text-purple-300 text-lg truncate">
+              {referralLink}
             </div>
+            <button 
+              onClick={copyToClipboard}
+              className={`px-10 py-5 rounded-2xl font-black flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-xl ${
+                copied ? 'bg-green-500 text-white' : 'bg-white text-slate-950 hover:bg-slate-100'
+              }`}
+            >
+              {copied ? <Check className="w-6 h-6" /> : <Copy className="w-6 h-6" />}
+              {copied ? 'Copied!' : 'Copy Link'}
+            </button>
           </div>
-
-          <button 
-            disabled={!canWithdraw || isWithdrawing}
-            onClick={handleWithdraw}
-            className={`w-full py-6 rounded-2xl font-black flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-2xl ${
-              canWithdraw 
-              ? 'bg-white text-slate-900 hover:scale-[1.02]' 
-              : 'bg-white/10 text-white/40 cursor-not-allowed'
-            }`}
-          >
-            {isWithdrawing ? <Clock className="w-5 h-5 animate-spin" /> : <ArrowUpRight className="w-6 h-6" />}
-            {isWithdrawing ? 'Processing...' : withdrawSuccess ? 'Funds Sent!' : 'Withdraw to My Card'}
-          </button>
         </div>
       </div>
 
-      {/* Config Card & Payout */}
-      <div className="bg-slate-900 border border-white/10 p-10 rounded-[2.5rem] space-y-8">
-        <h3 className="text-2xl font-black text-white flex items-center gap-3">
-          <CreditCard className="w-6 h-6 text-green-500" />
-          Where should we send your funds?
-        </h3>
-
-        <form onSubmit={handleSavePayout} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Payout Method</label>
-              <div className="flex gap-2 p-1.5 bg-slate-950 rounded-2xl border border-white/5">
-                {(['card', 'paypal', 'bank'] as const).map((method) => (
-                  <button 
-                    key={method}
-                    type="button"
-                    onClick={() => setPayoutMethod(method)}
-                    className={`flex-1 py-4 rounded-xl text-xs font-black transition-all ${payoutMethod === method ? 'bg-white/10 text-white shadow-xl' : 'text-slate-500 hover:text-slate-400'}`}
-                  >
-                    {method === 'card' ? 'Debit Card' : method === 'bank' ? 'Bank Account' : 'PayPal'}
-                  </button>
-                ))}
+      {/* Reward Milestones */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {milestones.map((m, i) => (
+          <div 
+            key={i} 
+            className={`p-8 rounded-[2.5rem] border transition-all space-y-6 flex flex-col justify-between ${
+              m.reached 
+              ? 'bg-purple-500/10 border-purple-500/30 shadow-xl shadow-purple-500/5' 
+              : 'bg-slate-900/50 border-white/5 opacity-60'
+            }`}
+          >
+            <div className="space-y-4">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${m.reached ? 'bg-purple-500 text-white' : 'bg-slate-800 text-slate-500'}`}>
+                {m.icon}
+              </div>
+              <div>
+                <h4 className={`text-sm font-black uppercase tracking-widest ${m.reached ? 'text-purple-400' : 'text-slate-500'}`}>{m.label}</h4>
+                <p className="text-xl font-black text-white leading-tight">{m.reward}</p>
               </div>
             </div>
             
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Stripe Email</label>
-              <input 
-                type="email" 
-                required
-                placeholder="boss@yourproject.ai"
-                value={payoutEmail}
-                onChange={(e) => setPayoutEmail(e.target.value)}
-                className="w-full bg-slate-950 border border-white/10 rounded-2xl px-6 py-5 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all text-white text-lg"
-              />
+            <div className="pt-4 flex items-center gap-2">
+              {m.reached ? (
+                <div className="flex items-center gap-1.5 text-green-400 text-xs font-bold uppercase tracking-widest">
+                  <Check className="w-4 h-4" /> Unlocked
+                </div>
+              ) : (
+                <div className="text-slate-600 text-[10px] font-black uppercase tracking-widest">
+                  {stats.inviteCount} / {m.count} Done
+                </div>
+              )}
             </div>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Banking Details (Simulation)</label>
-            <input 
-              type="text" 
-              required
-              placeholder={payoutMethod === 'card' ? 'Card Number (**** **** **** ****)' : 'Routing/IBAN Number'}
-              className="w-full bg-slate-950 border border-white/10 rounded-2xl px-6 py-5 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all text-white font-mono text-xl"
-            />
-          </div>
-
-          <button 
-            type="submit"
-            disabled={isSaving}
-            className="w-full py-6 rounded-3xl font-black bg-white text-slate-900 hover:bg-slate-100 transition-all transform active:scale-95 shadow-xl text-xl"
-          >
-            {isSaving ? 'Connecting Account...' : saveSuccess ? 'Account Linked (Demo)!' : 'Link My Boss Card'}
-          </button>
-        </form>
-      </div>
-
-      {/* Global Sales Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
-          { label: 'Total Sales', value: stats.totalSales, icon: <TrendingUp className="w-5 h-5" />, color: 'text-blue-400' },
-          { label: 'Active Subs', value: stats.activeSubscribers, icon: <Users className="w-5 h-5" />, color: 'text-purple-400' },
-          { label: 'Gross Revenue', value: `$${stats.netRevenue.toFixed(2)}`, icon: <BarChart3 className="w-5 h-5" />, color: 'text-green-400' },
-        ].map((item, i) => (
-          <div key={i} className="bg-slate-900/50 p-8 rounded-[2.5rem] border border-white/5 space-y-4">
-            <div className={`flex items-center gap-3 text-[10px] font-black uppercase tracking-widest ${item.color}`}>
-              {item.icon}
-              {item.label}
-            </div>
-            <p className="text-4xl font-black text-white">{item.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Benefits Summary */}
+      <div className="bg-slate-900/50 p-10 rounded-[2.5rem] border border-white/5 space-y-8">
+        <h3 className="text-2xl font-black text-white flex items-center gap-3">
+          <Heart className="w-6 h-6 text-pink-500" fill="currentColor" />
+          Why Refer?
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+          <div className="space-y-4">
+            <h4 className="font-bold text-white text-lg">For You</h4>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3 text-slate-400 text-sm">
+                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0" />
+                Stack discounts up to 100% (Lifetime Pro).
+              </li>
+              <li className="flex items-start gap-3 text-slate-400 text-sm">
+                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0" />
+                Unlock exclusive Founder Badges in the app.
+              </li>
+            </ul>
+          </div>
+          <div className="space-y-4">
+            <h4 className="font-bold text-white text-lg">For Your Friends</h4>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3 text-slate-400 text-sm">
+                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-pink-500 flex-shrink-0" />
+                Immediate 10% discount on their first month.
+              </li>
+              <li className="flex items-start gap-3 text-slate-400 text-sm">
+                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-pink-500 flex-shrink-0" />
+                Entry to the private Pro Discord community.
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -12,10 +12,10 @@ import Billing from './components/Billing';
 import LaunchPlan from './components/LaunchPlan';
 import AffiliateDashboard from './components/AffiliateDashboard';
 import StripeCheckout from './components/StripeCheckout';
-import { Sparkles, History as HistoryIcon, LayoutGrid, Zap, CreditCard, Rocket, LogOut, BarChart3 } from 'lucide-react';
+import { Sparkles, History as HistoryIcon, LayoutGrid, Zap, CreditCard, Rocket, LogOut, Gift } from 'lucide-react';
 
 const App: React.FC = () => {
-  const [view, setView] = useState<'create' | 'templates' | 'history' | 'billing' | 'launch' | 'affiliate' | 'checkout'>('create');
+  const [view, setView] = useState<'create' | 'templates' | 'history' | 'billing' | 'launch' | 'rewards' | 'checkout'>('create');
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -108,14 +108,7 @@ const App: React.FC = () => {
         ...user, 
         plan: 'pro',
         subscriptionId: `sub_${Math.random().toString(36).substr(2, 9)}`,
-        subscriptionStatus: 'active',
-        ownerStats: {
-          ...user.ownerStats,
-          totalSales: user.ownerStats.totalSales + 1,
-          activeSubscribers: user.ownerStats.activeSubscribers + 1,
-          netRevenue: user.ownerStats.netRevenue + 5.00,
-          pendingPayout: user.ownerStats.pendingPayout + 4.70
-        }
+        subscriptionStatus: 'active'
       };
       handleUpdateUser(updated);
       setView('create');
@@ -153,7 +146,7 @@ const App: React.FC = () => {
               <button onClick={() => setView('create')} className={`nav-btn ${view === 'create' ? 'active' : ''}`}><Sparkles className="w-4 h-4" /><span className="hidden lg:inline">Create</span></button>
               <button onClick={() => setView('templates')} className={`nav-btn ${view === 'templates' ? 'active' : ''}`}><LayoutGrid className="w-4 h-4" /><span className="hidden lg:inline">Templates</span></button>
               <button onClick={() => setView('history')} className={`nav-btn ${view === 'history' ? 'active' : ''}`}><HistoryIcon className="w-4 h-4" /><span className="hidden lg:inline">History</span></button>
-              <button onClick={() => setView('affiliate')} className={`nav-btn ${view === 'affiliate' ? 'active' : ''}`}><BarChart3 className="w-4 h-4" /><span className="hidden lg:inline">Earnings</span></button>
+              <button onClick={() => setView('rewards')} className={`nav-btn ${view === 'rewards' ? 'active' : ''}`}><Gift className="w-4 h-4" /><span className="hidden lg:inline">Rewards</span></button>
               <button onClick={() => setView('launch')} className={`nav-btn ${view === 'launch' ? 'active' : ''}`}><Rocket className="w-4 h-4" /><span className="hidden lg:inline">Launch</span></button>
               <div className="h-6 w-px bg-white/10 mx-2 hidden sm:block" />
               <button onClick={() => setView('billing')} className={`nav-btn ${view === 'billing' ? 'active' : ''}`}>
@@ -239,7 +232,7 @@ const App: React.FC = () => {
         )}
 
         {view === 'launch' && <LaunchPlan />}
-        {view === 'affiliate' && <AffiliateDashboard user={user} onUpdateUser={handleUpdateUser} />}
+        {view === 'rewards' && <AffiliateDashboard user={user} onUpdateUser={handleUpdateUser} />}
       </main>
 
       {view !== 'checkout' && (

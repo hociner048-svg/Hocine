@@ -26,11 +26,11 @@ export interface Template {
   isCustom?: boolean;
 }
 
-export interface OwnerStats {
-  totalSales: number;
-  activeSubscribers: number;
-  netRevenue: number;
-  pendingPayout: number;
+export interface ReferralStats {
+  inviteCount: number;
+  discountLevel: number; // 0, 20, 50, 100
+  unlockedMonths: number;
+  hasLifetimeBadge: boolean;
 }
 
 export interface User {
@@ -40,10 +40,7 @@ export interface User {
   plan: 'free' | 'pro';
   promptsCount: number;
   referralCode: string;
-  ownerStats: OwnerStats;
-  payoutEmail?: string;
-  payoutMethod?: 'card' | 'bank' | 'paypal';
-  payoutCardLast4?: string;
+  referralStats: ReferralStats;
   subscriptionId?: string;
   subscriptionStatus?: 'active' | 'past_due' | 'canceled';
 }
